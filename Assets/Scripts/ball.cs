@@ -7,6 +7,7 @@ public class ball : MonoBehaviour {
     public GameObject arrowHead;
 
     public string powerUsed;
+    public GameObject power;
 
     public int invincibleTime = 0;
     public float setGravityScale;
@@ -24,6 +25,8 @@ public class ball : MonoBehaviour {
     public static int settingTrajectory = 1;
     public static int inPlay = 2;
 
+    private float timeInDestroy = 0;
+
     private bool zoomedOut = false;
 
     // Use this for initialization
@@ -40,7 +43,7 @@ public class ball : MonoBehaviour {
 	}
 
 	// Update is called once per frame
-	void FixedUpdate () {
+	void Update () {
         if (ballState == trackingMouse)
         {
             //move ball to mouse location
@@ -126,7 +129,15 @@ public class ball : MonoBehaviour {
             ballVelocity = selfRB.velocity.sqrMagnitude;
             if (ballVelocity < 20)
             {
-                EndSelf();
+                if (invincibleTime > 50)
+                {
+                    //determine if withing range of a wall from above
+                    EndSelf();
+                }
+                else
+                {
+                    invincibleTime++;
+                }
             }
             else
             {
@@ -134,10 +145,11 @@ public class ball : MonoBehaviour {
             }
             if (true == Input.GetButtonDown("Fire1"))
             {
-                //Debug.Log("click detected");
+                Debug.Log("click detected");
                 if (0 < GM.instance.powerUses)
                 {
                     GM.instance.PowerDecrease();
+                    Debug.Log(string.Format("Power being used: {0}", powerUsed));
                     UsePower(powerUsed);
                 }
                 else
@@ -148,6 +160,17 @@ public class ball : MonoBehaviour {
             else if (true == Input.GetButtonDown("EndRun"))
             {
                 EndSelf();
+            }
+            if (GM.instance.destroyOn == true)
+            {
+                selfRB.gravityScale = 0;
+
+                timeInDestroy -= Time.deltaTime;
+                if (timeInDestroy <= 0)
+                {
+                    GM.instance.destroyOn = false;
+                    selfRB.gravityScale = GM.instance.setGravityScale;
+                }
             }
         }
     }
@@ -169,7 +192,59 @@ public class ball : MonoBehaviour {
         //}
     }
 
+    void EndSelf()
+    {
+        selfSR.color = new Color(selfSR.color.r, selfSR.color.g, selfSR.color.b, .5f);
+        startingZone.transform.localScale = new Vector2(2.5f, 2.5f);
+        startingZone.transform.position = transform.position;
 
+        //determine if overlapping walls
+        GameObject walls = GameObject.Find("walls");
+        List<SpriteRenderer> childrenWalls = new List<SpriteRenderer>(walls.GetComponentsInChildren<SpriteRenderer>());
+        List<SpriteRenderer> childrenWallsToConsider = new List<SpriteRenderer>();
+        List<Transform> wallLocations = new List<Transform>(walls.GetComponentsInChildren<Transform>());
+        int i = 0;
+
+        foreach (Transform wall in wallLocations)
+        {
+            float distance = Vector3.Distance(wall.position, startingZone.transform.position);
+            if (distance < 2)
+            {
+                childrenWallsToConsider.Add(childrenWalls[i]);
+            }
+            i++;
+        }
+
+        bool foundConflict = (childrenWallsToConsider.Count > 0);
+        Vector3 originPosition = new Vector3(0, 0, 0);
+
+        while (true == foundConflict)
+        {
+            Debug.Log(string.Format("starting zone min and max: {0} {1}", startingZoneSR.bounds.min, startingZoneSR.bounds.max));
+
+            //ideally want to replace this with likely conflicting obstacles, not literally every obstacle
+            foreach (SpriteRenderer wall in childrenWallsToConsider)
+            {
+                foundConflict = DetermineConflict(wall);
+                Debug.Log(string.Format("conflict found: {0}", foundConflict));
+                if (true == foundConflict)
+                {
+                    Debug.Log(string.Format("Found an overlapping object"));
+                    Vector3 originDirection = originPosition - startingZone.transform.position;
+                    originDirection.Normalize();
+                    startingZone.transform.Translate(new Vector3(originDirection.x + 0.1f, originDirection.y + 0.1f, 0));
+                    break;
+                }
+            }
+        }
+
+        startingZoneSR.color = new Color(startingZoneSR.color.r, startingZoneSR.color.g, startingZoneSR.color.b, 1f);
+
+        selfRB.isKinematic = true;
+        ballState = trackingMouse;
+
+        GM.instance.LoseLife();
+    }
 
     //midpoints for added accuracy
     //float verticalMiddle = topLeftSZ.y + (bottomLeftSZ.y - topLeftSZ.y) / 2;
@@ -183,10 +258,12 @@ public class ball : MonoBehaviour {
     {
         if (obstacle.name.Contains("slant"))
         {
+            Debug.Log(string.Format("found slanted wall: {0}", obstacle));
             return DetermineConflictSlantedObstacle(obstacle);            
         }
         else
         {
+            //Debug.Log("found normal wall");
             return DetermineConflictNormalObstacle(obstacle);
         }
     }
@@ -195,35 +272,36 @@ public class ball : MonoBehaviour {
     {
         //find determinates between point under question and all sides of wall
 
-        Vector3 bottomLeftSZ = new Vector3(startingZoneSR.bounds.min.x, startingZoneSR.bounds.min.y, 0);
-        Vector3 topLeftSZ = new Vector3(startingZoneSR.bounds.min.x, startingZoneSR.bounds.max.y, 0);
-        Vector3 bottomRightSZ = new Vector3(startingZoneSR.bounds.max.x, startingZoneSR.bounds.min.y, 0);
-        Vector3 topRightSZ = new Vector3(startingZoneSR.bounds.max.x, startingZoneSR.bounds.max.y, 0);
+        Vector2 bottomLeftSZ = new Vector3(startingZoneSR.bounds.min.x, startingZoneSR.bounds.min.y);
+        Vector2 topLeftSZ = new Vector3(startingZoneSR.bounds.min.x, startingZoneSR.bounds.max.y);
+        Vector2 bottomRightSZ = new Vector3(startingZoneSR.bounds.max.x, startingZoneSR.bounds.min.y);
+        Vector2 topRightSZ = new Vector3(startingZoneSR.bounds.max.x, startingZoneSR.bounds.max.y);
 
-        var wallScript = obstacle.GetComponent<slantedWalls>();
+        var wallScript = obstacle.GetComponent<SlantedWalls>();
+        Vector2 LMP = new Vector3(wallScript.minX, wallScript.yForMinX);
+        Vector2 TMP = new Vector3(wallScript.xForMaxY, wallScript.maxY);
+        Vector2 RMP = new Vector3(wallScript.maxX, wallScript.yForMaxX);
+        Vector2 BMP = new Vector3(wallScript.xForMinY, wallScript.minY);
 
-        Vector3 LMP = wallScript.leftMostPoint;
-        Vector3 TMP = wallScript.topMostPoint;
-        Vector3 RMP = wallScript.rightMostPoint;
-        Vector3 BMP = wallScript.bottomMostPoint;
+        Debug.Log(string.Format("LMP: {0} TMP: {1} RMP: {2} BMP: {3}", LMP, TMP, RMP, BMP));
 
         if (-1 == FindDeterminate(LMP, TMP, bottomLeftSZ) && 1 == FindDeterminate(LMP, BMP, bottomLeftSZ)
-            && -1 == FindDeterminate(RMP, TMP, bottomLeftSZ) && 1 == FindDeterminate(RMP, BMP, bottomLeftSZ))
+            && -1 == FindDeterminate(TMP, RMP, bottomLeftSZ) && 1 == FindDeterminate(BMP, RMP, bottomLeftSZ))
         {
             return true;
         }
         if (-1 == FindDeterminate(LMP, TMP, topLeftSZ) && 1 == FindDeterminate(LMP, BMP, topLeftSZ)
-            && -1 == FindDeterminate(RMP, TMP, topLeftSZ) && 1 == FindDeterminate(RMP, BMP, topLeftSZ))
+            && -1 == FindDeterminate(TMP, RMP, topLeftSZ) && 1 == FindDeterminate(BMP, RMP, topLeftSZ))
         {
             return true;
         }
         if (-1 == FindDeterminate(LMP, TMP, bottomRightSZ) && 1 == FindDeterminate(LMP, BMP, bottomRightSZ)
-            && -1 == FindDeterminate(RMP, TMP, bottomRightSZ) && 1 == FindDeterminate(RMP, BMP, bottomRightSZ))
+            && -1 == FindDeterminate(TMP, RMP, bottomRightSZ) && 1 == FindDeterminate(BMP, RMP, bottomRightSZ))
         {
             return true;
         }
         if (-1 == FindDeterminate(LMP, TMP, topRightSZ) && 1 == FindDeterminate(LMP, BMP, topRightSZ)
-            && -1 == FindDeterminate(RMP, TMP, topRightSZ) && 1 == FindDeterminate(RMP, BMP, topRightSZ))
+            && -1 == FindDeterminate(TMP, RMP, topRightSZ) && 1 == FindDeterminate(BMP, RMP, topRightSZ))
         {
             return true;
         }
@@ -271,70 +349,64 @@ public class ball : MonoBehaviour {
 
     public void UsePower(string powerToDo)
     {
+        //Debug.Log("using power");
         if (powerToDo.ToLower().Contains("fireworks"))
         {
             //Debug.Log("fireworks detected");
-            //create lines from ball location (instantiate?)
-            //detect collision of lines with bricks, destroy if collision
-            //use firework like effects
+            Instantiate(power, transform.position, Quaternion.identity);
+            Physics2D.IgnoreCollision(power.GetComponent<BoxCollider2D>(), GetComponent<CircleCollider2D>());
         }
-        if (powerToDo.ToLower().Contains("crush"))
+        if (powerToDo.ToLower().Contains("destroy"))
         {
-            //determine which direction ball is going
-            //add force it that direction and downwards
-            //maybe trigger something to pass through all balls for a second?
-            //increase gravity for a second?
+            selfRB.AddForce(new Vector2(selfRB.velocity.x*50, selfRB.velocity.y*50), ForceMode2D.Force);
+
+            Instantiate(power, transform.position, Quaternion.identity);
+
+            GM.instance.destroyOn = true;
+            timeInDestroy += 5;
         }
         if (powerToDo.ToLower().Contains("help"))
         {
-            //white smoke?
-            //lower gravity by .1
+            Instantiate(power, transform.position, Quaternion.identity);
+            selfRB.AddForce(new Vector2(0, GM.instance.setGravityScale * 110), ForceMode2D.Force);
+
+            if (setGravityScale <= 1)
+            {
+                GM.instance.setGravityScale = 0;
+                setGravityScale = 0;
+            }
+            else
+            {
+                GM.instance.setGravityScale -= 1;
+                setGravityScale -= 1;
+            }
         }
         if (powerToDo.ToLower().Contains("focus"))
         {
-            //find direction to end zone
-            //find current velocity
-            //make velocity go in that direction
-        }
-    }
-
-    void EndSelf()
-    {
-        selfSR.color = new Color(selfSR.color.r, selfSR.color.g, selfSR.color.b, .5f);
-        startingZone.transform.localScale = new Vector2(2.5f, 2.5f);
-        startingZone.transform.position = transform.position;
-
-        //determine if overlapping walls
-        GameObject walls = GameObject.Find("walls");
-        SpriteRenderer[] childrenWalls = walls.GetComponentsInChildren<SpriteRenderer>();
-        bool foundConflict = true;
-        Vector3 originPosition = new Vector3(0, 0, 0);
-
-        while (true == foundConflict)
-        {
-            //Debug.Log(string.Format("starting zone min and max: {0} {1}", startingZoneSR.bounds.min, startingZoneSR.bounds.max));
-
-            //ideally want to replace this with likely conflicting obstacles, not literally every obstacle
-            foreach (SpriteRenderer wall in childrenWalls)
+            //find farthest block
+            //destroy block
+            GameObject bricks = GameObject.Find("bricks(Clone)");
+            if (bricks == null)
             {
-                foundConflict = DetermineConflict(wall);
-                //Debug.Log(string.Format("conflict found: {0}", foundConflict));
-                if (true == foundConflict)
+                Debug.Log("no bricks found");
+            }
+            List<Transform> childrenBricks = new List<Transform>(bricks.GetComponentsInChildren<Transform>());
+            GameObject brickToDestroy = new GameObject();
+            float farthestBrickDistance = 0;
+
+            foreach (Transform brick in childrenBricks)
+            {
+                float distance = Vector3.Distance(brick.transform.position, transform.position);
+                if (farthestBrickDistance < distance)
                 {
-                    //Debug.Log(string.Format("Found an overlapping object"));
-                    Vector3 originDirection = originPosition - startingZone.transform.position;
-                    originDirection.Normalize();
-                    startingZone.transform.Translate(new Vector3(originDirection.x + 0.1f, originDirection.y + 0.1f, 0));
-                    break;
+                    brickToDestroy = brick.gameObject;
                 }
             }
+
+            Instantiate(power, brickToDestroy.transform.position, Quaternion.identity);
+            Destroy(brickToDestroy);
+            //GM.instance.DestroyBrick();
         }
-
-        startingZoneSR.color = new Color(startingZoneSR.color.r, startingZoneSR.color.g, startingZoneSR.color.b, 1f);
-
-        selfRB.isKinematic = true;
-        ballState = trackingMouse;
-
-        GM.instance.LoseLife();
     }
+
 }

@@ -5,17 +5,21 @@ using UnityEngine.UI;
 public class GM : MonoBehaviour {
 
     public int lives = 3;
-    public int powerUses = 3;
+    public int powerUses = 0;
 
     public int bricks = 8;
+    public int bricksBroken;
 
     public string powerUsed = "";
+    public GameObject levelPower;
 
     public float resetDelay = 1f;
     public float setGravityScale = 0;
+    public float timeScale = 1;
 
     public Text livesText;
     public Text powersText;
+    public Text bricksText;
 
     public GameObject gameOver;
     public GameObject youWon;
@@ -28,6 +32,8 @@ public class GM : MonoBehaviour {
     public static GM instance = null;
 
     private GameObject cloneBall;
+
+    public bool destroyOn = false;
 
 	// Use this for initialization
 	void Awake () {
@@ -42,7 +48,8 @@ public class GM : MonoBehaviour {
             instance = this;
         }
         Setup();
-	}
+        Time.timeScale = timeScale;
+    }
 
     void Setup() {
         var startingZonePosition = startingZone.GetComponent<Transform>();
@@ -54,10 +61,7 @@ public class GM : MonoBehaviour {
         var slowZonePosition = slowZone.GetComponent<Transform>();
         Instantiate(slowZone, slowZonePosition.position, Quaternion.identity);
 
-        cloneBall = Instantiate(ball, transform.position, Quaternion.identity) as GameObject;
-        ball ballStats = cloneBall.GetComponent<ball>();
-        ballStats.setGravityScale = setGravityScale;
-        ballStats.powerUsed = powerUsed;
+        SetupBall();
     }
 
     void CheckGameOver() {
@@ -84,7 +88,7 @@ public class GM : MonoBehaviour {
     void NextLevel()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene("level2");
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex+1);
     }
 
     public void LoseLife()
@@ -103,17 +107,34 @@ public class GM : MonoBehaviour {
         cloneBall = Instantiate(ball, transform.position, Quaternion.identity) as GameObject;
         ball ballStats = cloneBall.GetComponent<ball>();
         ballStats.setGravityScale = setGravityScale;
+        ballStats.powerUsed = powerUsed;
+        ballStats.power = levelPower;
     }
 
     public void DestroyBrick()
     {
         bricks--;
+        bricksBroken++;
+        if (bricksBroken == 5)
+        {
+            bricksBroken = 0;
+            PowerIncrease();
+        }
+        bricksText.text = "Bricks Left: " + bricks;
+
         CheckGameOver();
     }
 
     public void PowerDecrease()
     {
+        //Debug.Log("decreasing power");
         powerUses--;
+        powersText.text = powerUsed + ": " + powerUses;
+    }
+
+    public void PowerIncrease()
+    {
+        powerUses++;
         powersText.text = powerUsed + ": " + powerUses;
     }
 }
