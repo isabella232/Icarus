@@ -7,14 +7,14 @@ public class ball : MonoBehaviour {
     public GameObject arrowHead;
 
     public string powerUsed;
-    public GameObject power;
+    public GameObject powerObject;
 
     public int invincibleTime = 0;
-    public float setGravityScale;
+    public static float setGravityScale;
 
     private float ballVelocity;
-    private Rigidbody2D selfRB;
-	private SpriteRenderer selfSR;
+    static public Rigidbody2D ballRB;
+	private SpriteRenderer ballSR;
 	private GameObject startingZone;
     private SpriteRenderer startingZoneSR;
     private GameObject instantiatedArrowBody;
@@ -25,16 +25,16 @@ public class ball : MonoBehaviour {
     public static int settingTrajectory = 1;
     public static int inPlay = 2;
 
-    private float timeInDestroy = 0;
-
     private bool zoomedOut = false;
+
+    PowerLogic powerLogic = new PowerLogic();
 
     // Use this for initialization
     void Awake () {
-		selfRB = GetComponent<Rigidbody2D> ();
+		ballRB = GetComponent<Rigidbody2D> ();
 
-		selfSR = GetComponent<SpriteRenderer> ();
-        selfSR.color = new Color(selfSR.color.r, selfSR.color.g, selfSR.color.b, .5f);
+		ballSR = GetComponent<SpriteRenderer> ();
+        ballSR.color = new Color(ballSR.color.r, ballSR.color.g, ballSR.color.b, .5f);
         
 		startingZone = GameObject.Find("startingZone(Clone)");
         startingZoneSR = startingZone.GetComponent<SpriteRenderer> ();
@@ -61,7 +61,7 @@ public class ball : MonoBehaviour {
                     CreateArrow();
 
                     ballState = settingTrajectory;
-                    selfSR.color = new Color(selfSR.color.r, selfSR.color.g, selfSR.color.b, 1f);
+                    ballSR.color = new Color(ballSR.color.r, ballSR.color.g, ballSR.color.b, 1f);
 
                     startingZoneSR.color = new Color(startingZoneSR.color.r, startingZoneSR.color.g, startingZoneSR.color.b, .5f);
                 }
@@ -103,8 +103,8 @@ public class ball : MonoBehaviour {
                 ballState = inPlay;
                 startingZoneSR.color = new Color(startingZoneSR.color.r, startingZoneSR.color.g, startingZoneSR.color.b, 0f);
                 //allow for physics to take place
-                selfRB.isKinematic = false;
-                selfRB.gravityScale = setGravityScale;
+                ballRB.isKinematic = false;
+                ballRB.gravityScale = setGravityScale;
 
                 //find angle and length of arrow
                 float arrowMagnitude = instantiatedArrowBody.transform.localScale.x;
@@ -115,7 +115,7 @@ public class ball : MonoBehaviour {
                 float magnitudeY = Mathf.Sin(arrowAngle * Mathf.Deg2Rad) * arrowMagnitude;
 
                 //push ball in this direction
-                selfRB.AddForce(new Vector2(magnitudeX * 1.4f, magnitudeY * 1.4f));
+                ballRB.AddForce(new Vector2(magnitudeX * 1.4f, magnitudeY * 1.4f));
 
                 //delete arrow graphic
                 Destroy(instantiatedArrowBody);
@@ -126,7 +126,7 @@ public class ball : MonoBehaviour {
         else if (ballState == inPlay)
         {
 
-            ballVelocity = selfRB.velocity.sqrMagnitude;
+            ballVelocity = ballRB.velocity.sqrMagnitude;
             if (ballVelocity < 20)
             {
                 if (invincibleTime > 50)
@@ -145,33 +145,13 @@ public class ball : MonoBehaviour {
             }
             if (true == Input.GetButtonDown("Fire1"))
             {
-                Debug.Log("click detected");
-                if (0 < GM.instance.powerUses)
-                {
-                    GM.instance.PowerDecrease();
-                    Debug.Log(string.Format("Power being used: {0}", powerUsed));
-                    UsePower(powerUsed);
-                }
-                else
-                {
-                    //make tink noise indicating uses are empty?
-                }
+                powerLogic.InitiatePower();
             }
             else if (true == Input.GetButtonDown("EndRun"))
             {
                 EndSelf();
             }
-            if (GM.instance.destroyOn == true)
-            {
-                selfRB.gravityScale = 0;
-
-                timeInDestroy -= Time.deltaTime;
-                if (timeInDestroy <= 0)
-                {
-                    GM.instance.destroyOn = false;
-                    selfRB.gravityScale = GM.instance.setGravityScale;
-                }
-            }
+            powerLogic.PowerUpdate();
         }
     }
 
@@ -194,7 +174,7 @@ public class ball : MonoBehaviour {
 
     void EndSelf()
     {
-        selfSR.color = new Color(selfSR.color.r, selfSR.color.g, selfSR.color.b, .5f);
+        ballSR.color = new Color(ballSR.color.r, ballSR.color.g, ballSR.color.b, .5f);
         startingZone.transform.localScale = new Vector2(2.5f, 2.5f);
         startingZone.transform.position = transform.position;
 
@@ -204,12 +184,20 @@ public class ball : MonoBehaviour {
         List<SpriteRenderer> childrenWallsToConsider = new List<SpriteRenderer>();
         List<Transform> wallLocations = new List<Transform>(walls.GetComponentsInChildren<Transform>());
         int i = 0;
+        Debug.Log(string.Format("number of all walls: {0}", childrenWalls.Count));
 
         foreach (Transform wall in wallLocations)
         {
+            if (wall.name == "walls")
+            {
+                //parent not to be considered
+                continue;
+            }
             float distance = Vector3.Distance(wall.position, startingZone.transform.position);
+            Debug.Log(string.Format("looking at wall index {0}, named {1}", i, wall.gameObject));
             if (distance < 2)
             {
+                Debug.Log(string.Format("adding wall {0} to list to consider", i));
                 childrenWallsToConsider.Add(childrenWalls[i]);
             }
             i++;
@@ -240,7 +228,7 @@ public class ball : MonoBehaviour {
 
         startingZoneSR.color = new Color(startingZoneSR.color.r, startingZoneSR.color.g, startingZoneSR.color.b, 1f);
 
-        selfRB.isKinematic = true;
+        ballRB.isKinematic = true;
         ballState = trackingMouse;
 
         GM.instance.LoseLife();
@@ -345,68 +333,6 @@ public class ball : MonoBehaviour {
         }
 
         return false;
-    }
-
-    public void UsePower(string powerToDo)
-    {
-        //Debug.Log("using power");
-        if (powerToDo.ToLower().Contains("fireworks"))
-        {
-            //Debug.Log("fireworks detected");
-            Instantiate(power, transform.position, Quaternion.identity);
-            Physics2D.IgnoreCollision(power.GetComponent<BoxCollider2D>(), GetComponent<CircleCollider2D>());
-        }
-        if (powerToDo.ToLower().Contains("destroy"))
-        {
-            selfRB.AddForce(new Vector2(selfRB.velocity.x*50, selfRB.velocity.y*50), ForceMode2D.Force);
-
-            Instantiate(power, transform.position, Quaternion.identity);
-
-            GM.instance.destroyOn = true;
-            timeInDestroy += 5;
-        }
-        if (powerToDo.ToLower().Contains("help"))
-        {
-            Instantiate(power, transform.position, Quaternion.identity);
-            selfRB.AddForce(new Vector2(0, GM.instance.setGravityScale * 110), ForceMode2D.Force);
-
-            if (setGravityScale <= 1)
-            {
-                GM.instance.setGravityScale = 0;
-                setGravityScale = 0;
-            }
-            else
-            {
-                GM.instance.setGravityScale -= 1;
-                setGravityScale -= 1;
-            }
-        }
-        if (powerToDo.ToLower().Contains("focus"))
-        {
-            //find farthest block
-            //destroy block
-            GameObject bricks = GameObject.Find("bricks(Clone)");
-            if (bricks == null)
-            {
-                Debug.Log("no bricks found");
-            }
-            List<Transform> childrenBricks = new List<Transform>(bricks.GetComponentsInChildren<Transform>());
-            GameObject brickToDestroy = new GameObject();
-            float farthestBrickDistance = 0;
-
-            foreach (Transform brick in childrenBricks)
-            {
-                float distance = Vector3.Distance(brick.transform.position, transform.position);
-                if (farthestBrickDistance < distance)
-                {
-                    brickToDestroy = brick.gameObject;
-                }
-            }
-
-            Instantiate(power, brickToDestroy.transform.position, Quaternion.identity);
-            Destroy(brickToDestroy);
-            //GM.instance.DestroyBrick();
-        }
     }
 
 }

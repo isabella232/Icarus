@@ -25,7 +25,7 @@ public class GM : MonoBehaviour {
     public GameObject youWon;
     public GameObject bricksPrefab;
     public GameObject slowZone;
-    public GameObject ball;
+    public GameObject ballReference;
     public GameObject startingZone;
     public GameObject collisionParticles;
 
@@ -104,16 +104,14 @@ public class GM : MonoBehaviour {
 
     void SetupBall()
     {
-        cloneBall = Instantiate(ball, transform.position, Quaternion.identity) as GameObject;
-        ball ballStats = cloneBall.GetComponent<ball>();
-        ballStats.setGravityScale = setGravityScale;
-        ballStats.powerUsed = powerUsed;
-        ballStats.power = levelPower;
+        cloneBall = Instantiate(ballReference, transform.position, Quaternion.identity) as GameObject;
+        ball.setGravityScale = setGravityScale;
     }
 
     public void DestroyBrick()
     {
         bricks--;
+
         bricksBroken++;
         if (bricksBroken == 5)
         {

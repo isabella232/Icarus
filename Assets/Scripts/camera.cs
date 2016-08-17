@@ -15,7 +15,7 @@ public class camera : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-        Debug.Log(string.Format("current position: {0}", transform.position));
+        //Debug.Log(string.Format("current position: {0}", transform.position));
         try
         {
             ball ball = GameObject.Find("ball(Clone)").GetComponent<ball>();
