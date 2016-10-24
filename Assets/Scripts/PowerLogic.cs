@@ -11,12 +11,15 @@ public class PowerLogic : MonoBehaviour {
         //Debug.Log("click detected");
         if (0 < GM.instance.powerUses)
         {
+            //Debug.Log("using power");
             GM.instance.PowerDecrease();
             //Debug.Log(string.Format("Power being used: {0}", powerUsed));
             UsePower(GM.instance.powerUsed);
         }
         else
         {
+            Debug.Log("no powers to use");
+
             //make tink noise indicating uses are empty?
         }
     }
@@ -35,17 +38,17 @@ public class PowerLogic : MonoBehaviour {
             Debug.Log(string.Format("current speed x: {0}, y: {1}", ball.ballRB.velocity.x, ball.ballRB.velocity.y));
             if (Mathf.Abs(ball.ballRB.velocity.x) < 20 && Mathf.Abs(ball.ballRB.velocity.y) < 20)
             {
-                Debug.Log("speed up");
+                //Debug.Log("speed up");
                 ball.ballRB.AddForce(new Vector2(ball.ballRB.velocity.x * 50, ball.ballRB.velocity.y * 50), ForceMode2D.Force);
             }
             else if (Mathf.Abs(ball.ballRB.velocity.x) < 30 && Mathf.Abs(ball.ballRB.velocity.y) < 30)
             {
-                Debug.Log("less speed up");
+                //Debug.Log("less speed up");
                 ball.ballRB.AddForce(new Vector2(ball.ballRB.velocity.x * 2, ball.ballRB.velocity.y * 2), ForceMode2D.Force);
             }
             else
             {
-                Debug.Log("no speed up");
+                //Debug.Log("no speed up");
                 //no more speed up
             }
 
@@ -56,15 +59,17 @@ public class PowerLogic : MonoBehaviour {
         }
         if (powerToDo.ToLower().Contains("help"))
         {
+            //Debug.Log("using help");
+
             Instantiate(GM.instance.levelPower, ball.ballRB.transform.position, Quaternion.identity);
             ball.ballRB.AddForce(new Vector2(0, GM.instance.setGravityScale * 110), ForceMode2D.Force);
 
-            if (ball.setGravityScale <= 1)
-            {
-                GM.instance.setGravityScale = 0;
-                ball.setGravityScale = 0;
-            }
-            else
+            //if (ball.setGravityScale <= 1)
+            //{
+            //    GM.instance.setGravityScale = 0;
+            //    ball.setGravityScale = 0;
+            //}
+            //else
             {
                 GM.instance.setGravityScale -= 1;
                 ball.setGravityScale -= 1;
@@ -77,7 +82,7 @@ public class PowerLogic : MonoBehaviour {
             GameObject bricks = GameObject.Find("bricks(Clone)");
             if (bricks == null)
             {
-                Debug.Log("no bricks found");
+                //Debug.Log("no bricks found");
             }
             List<Transform> childrenBricks = new List<Transform>(bricks.GetComponentsInChildren<Transform>());
             GameObject brickToDestroy = new GameObject();
@@ -100,11 +105,15 @@ public class PowerLogic : MonoBehaviour {
                     closestBrickDistance = distance;
                 }
             }
-            Debug.Log(string.Format("brick to destroy: {0}", brickToDestroy));
+            //Debug.Log(string.Format("brick to destroy: {0}", brickToDestroy));
 
             Instantiate(GM.instance.levelPower, brickToDestroy.transform.position, Quaternion.identity);
             Destroy(brickToDestroy);
             //GM.instance.DestroyBrick();
+        }
+        else
+        {
+
         }
     }
 

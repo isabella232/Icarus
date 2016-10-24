@@ -17,7 +17,7 @@ public class fireworks : MonoBehaviour
     void Update()
     {
         timeAlive++;
-        Debug.Log(string.Format("particle location: {0}", GameObject.Find("Particle System").GetComponent<Transform>().position));
+        //Debug.Log(string.Format("particle location: {0}", GameObject.Find("Particle System").GetComponent<Transform>().position));
         SetSelfScale();
 
         if (timeAlive > 100)
