@@ -1,0 +1,48 @@
+Initialize engine version: 5.4.1f1 (649f48bbbf0f)
+GfxDevice: creating device client; threaded=1
+Direct3D:
+    Version:  Direct3D 11.0 [level 11.0]
+    Renderer: NVIDIA GeForce GTX 780 Ti  (ID=0x100a)
+    Vendor:   NVIDIA
+    VRAM:     3013 MB
+Begin MonoManager ReloadAssembly
+Platform assembly: C:\Users\Public\Documents\Unity Projects\Icarus\BlackBoxTesting1.1.0_Data\Managed\UnityEngine.dll (this message is harmless)
+Loading C:\Users\Public\Documents\Unity Projects\Icarus\BlackBoxTesting1.1.0_Data\Managed\UnityEngine.dll into Unity Child Domain
+Platform assembly: C:\Users\Public\Documents\Unity Projects\Icarus\BlackBoxTesting1.1.0_Data\Managed\Assembly-CSharp.dll (this message is harmless)
+Loading C:\Users\Public\Documents\Unity Projects\Icarus\BlackBoxTesting1.1.0_Data\Managed\Assembly-CSharp.dll into Unity Child Domain
+Platform assembly: C:\Users\Public\Documents\Unity Projects\Icarus\BlackBoxTesting1.1.0_Data\Managed\UnityEngine.UI.dll (this message is harmless)
+Loading C:\Users\Public\Documents\Unity Projects\Icarus\BlackBoxTesting1.1.0_Data\Managed\UnityEngine.UI.dll into Unity Child Domain
+Platform assembly: C:\Users\Public\Documents\Unity Projects\Icarus\BlackBoxTesting1.1.0_Data\Managed\UnityEngine.Networking.dll (this message is harmless)
+Loading C:\Users\Public\Documents\Unity Projects\Icarus\BlackBoxTesting1.1.0_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
+- Completed reload, in  0.051 seconds
+Platform assembly: C:\Users\Public\Documents\Unity Projects\Icarus\BlackBoxTesting1.1.0_Data\Managed\System.Core.dll (this message is harmless)
+Platform assembly: C:\Users\Public\Documents\Unity Projects\Icarus\BlackBoxTesting1.1.0_Data\Managed\System.dll (this message is harmless)
+<RI> Initializing input.
+<RI> Input initialized.
+desktop: 1920x1080 60Hz; virtual: 3840x1080 at -1920,0
+<RI> Initialized touch support.
+UnloadTime: 0.965015 ms
+Unloading 6 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 5.119423 ms
+new instance attempting to take control. Current clip name: No_Human_-_Transplantation_Angel_Garcia_Remix new clip name: No_Human_-_Transplantation_Angel_Garcia_Remix
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 42)
+
+same song detected. detroying new instance
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 42)
+
+new instance attempting to take control. Current clip name: No_Human_-_Transplantation_Angel_Garcia_Remix new clip name: No_Human_-_Transplantation_Angel_Garcia_Remix
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 42)
+
+same song detected. detroying new instance
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 42)
+
+
+Unloading 10 unused Assets to reduce memory usage. Loaded Objects now: 374.
+Total: 0.310148 ms (FindLiveObjects: 0.019096 ms CreateObjectMapping: 0.018437 ms MarkObjects: 0.229812 ms  DeleteObjects: 0.019754 ms)
+
+Setting up 1 worker threads for Enlighten.
+  Thread -> id: 9b04 -> priority: 1 

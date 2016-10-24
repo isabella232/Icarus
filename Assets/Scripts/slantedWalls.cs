@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class SlantedWalls : MonoBehaviour {
+public class slantedWalls : MonoBehaviour {
     public float minX;
     public float maxX;
     public float minY;

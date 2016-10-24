@@ -28,6 +28,7 @@ public class GM : MonoBehaviour {
     public GameObject ballReference;
     public GameObject startingZone;
     public GameObject collisionParticles;
+    public GameObject loadingImage;
 
     public static GM instance = null;
 
@@ -82,12 +83,14 @@ public class GM : MonoBehaviour {
     void Reset()
     {
         Time.timeScale = 1f;
+        loadingImage.SetActive(true);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     void NextLevel()
     {
         Time.timeScale = 1f;
+        loadingImage.SetActive(true);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex+1);
     }
 

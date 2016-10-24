@@ -28,7 +28,7 @@ public class camera : MonoBehaviour {
                 {
                     float distance = Vector3.Distance(transform.position, (ball.GetComponent<Transform>().position + startPosition));
 
-                    if (8 < distance)
+                    if (10 < distance)
                     {
                         Vector3 ballDirection = endingCameraSpot - transform.position;
 

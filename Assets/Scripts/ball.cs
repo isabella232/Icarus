@@ -184,7 +184,7 @@ public class ball : MonoBehaviour {
         List<SpriteRenderer> childrenWallsToConsider = new List<SpriteRenderer>();
         List<Transform> wallLocations = new List<Transform>(walls.GetComponentsInChildren<Transform>());
         int i = 0;
-        Debug.Log(string.Format("number of all walls: {0}", childrenWalls.Count));
+        //Debug.Log(string.Format("number of all walls: {0}", childrenWalls.Count));
 
         foreach (Transform wall in wallLocations)
         {
@@ -194,10 +194,10 @@ public class ball : MonoBehaviour {
                 continue;
             }
             float distance = Vector3.Distance(wall.position, startingZone.transform.position);
-            Debug.Log(string.Format("looking at wall index {0}, named {1}", i, wall.gameObject));
+            //Debug.Log(string.Format("looking at wall index {0}, named {1}", i, wall.gameObject));
             if (distance < 2)
             {
-                Debug.Log(string.Format("adding wall {0} to list to consider", i));
+                //Debug.Log(string.Format("adding wall {0} to list to consider", i));
                 childrenWallsToConsider.Add(childrenWalls[i]);
             }
             i++;
@@ -208,16 +208,16 @@ public class ball : MonoBehaviour {
 
         while (true == foundConflict)
         {
-            Debug.Log(string.Format("starting zone min and max: {0} {1}", startingZoneSR.bounds.min, startingZoneSR.bounds.max));
+            //Debug.Log(string.Format("starting zone min and max: {0} {1}", startingZoneSR.bounds.min, startingZoneSR.bounds.max));
 
             //ideally want to replace this with likely conflicting obstacles, not literally every obstacle
             foreach (SpriteRenderer wall in childrenWallsToConsider)
             {
                 foundConflict = DetermineConflict(wall);
-                Debug.Log(string.Format("conflict found: {0}", foundConflict));
+                //Debug.Log(string.Format("conflict found: {0}", foundConflict));
                 if (true == foundConflict)
                 {
-                    Debug.Log(string.Format("Found an overlapping object"));
+                    //Debug.Log(string.Format("Found an overlapping object"));
                     Vector3 originDirection = originPosition - startingZone.transform.position;
                     originDirection.Normalize();
                     startingZone.transform.Translate(new Vector3(originDirection.x + 0.1f, originDirection.y + 0.1f, 0));
@@ -246,7 +246,7 @@ public class ball : MonoBehaviour {
     {
         if (obstacle.name.Contains("slant"))
         {
-            Debug.Log(string.Format("found slanted wall: {0}", obstacle));
+            //Debug.Log(string.Format("found slanted wall: {0}", obstacle));
             return DetermineConflictSlantedObstacle(obstacle);            
         }
         else
@@ -265,13 +265,13 @@ public class ball : MonoBehaviour {
         Vector2 bottomRightSZ = new Vector3(startingZoneSR.bounds.max.x, startingZoneSR.bounds.min.y);
         Vector2 topRightSZ = new Vector3(startingZoneSR.bounds.max.x, startingZoneSR.bounds.max.y);
 
-        var wallScript = obstacle.GetComponent<SlantedWalls>();
+        var wallScript = obstacle.GetComponent<slantedWalls>();
         Vector2 LMP = new Vector3(wallScript.minX, wallScript.yForMinX);
         Vector2 TMP = new Vector3(wallScript.xForMaxY, wallScript.maxY);
         Vector2 RMP = new Vector3(wallScript.maxX, wallScript.yForMaxX);
         Vector2 BMP = new Vector3(wallScript.xForMinY, wallScript.minY);
 
-        Debug.Log(string.Format("LMP: {0} TMP: {1} RMP: {2} BMP: {3}", LMP, TMP, RMP, BMP));
+        //Debug.Log(string.Format("LMP: {0} TMP: {1} RMP: {2} BMP: {3}", LMP, TMP, RMP, BMP));
 
         if (-1 == FindDeterminate(LMP, TMP, bottomLeftSZ) && 1 == FindDeterminate(LMP, BMP, bottomLeftSZ)
             && -1 == FindDeterminate(TMP, RMP, bottomLeftSZ) && 1 == FindDeterminate(BMP, RMP, bottomLeftSZ))

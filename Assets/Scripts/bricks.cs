@@ -20,7 +20,7 @@ public class bricks : MonoBehaviour
     }
     void OnCollisionExit2D()
     {
-        Debug.Log("collision exited");
+        //Debug.Log("collision exited");
         Destroy(gameObject);
     }
 
@@ -31,13 +31,13 @@ public class bricks : MonoBehaviour
     }
     void OnTriggerStay2D()
     {
-        Debug.Log("Trigger stayed");
+        //Debug.Log("Trigger stayed");
         Destroy(gameObject);
     }
 
     void OnDestroy()
     {
-        Debug.Log("Being destroyed");
+        //Debug.Log("Being destroyed");
 
         GM.instance.DestroyBrick();
     }

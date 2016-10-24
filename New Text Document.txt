@@ -1,0 +1,3 @@
+This game combines the win-lose states of breakout (destroy blocks to progress, limited number of lives), and elements of minigolf (start ball in an area, play from where you land, shoot ball again once it stops). I like minigolf and breakout, which lead to this game. Also, gravity is a major factor, and there are 4 abilities you use to help you break blocks.
+
+There is a tutorial in the game, but at a minimum the game requires a mouse. click in the start area, aim the ball, and click again to fire. while the ball is moving, click anywhere to use an ability.
